@@ -59,4 +59,12 @@ The steps are as follows:
         able to identify which observations were from test and which from train. Set the row names so they 
         will be unique.
     13. Merge the test and train data frames.
-    14. Write the intermediary file. This is the "Step 4" data referred to in the assignment.
+    14. Write the intermediary file. This is the "Step 4" data referred to in the assignment. This step is 
+		commented out in the "final" version.
+	15. Create a new data frame containing the averages of each measurement grouped by subject and activity.
+		a.  Next create a list of labels for each average. This allows us to label all of the output columns.
+		b.  Create the data frame with averages grouped by subject and activity.
+			Also suppress the warnings from aggregate attempting to get the mean of the activity name column.
+		c.  Remove the "SubjectIdx", "ActivityIdx", and "ActivityName" columns - they were invalidated by the aggregate.
+		d.  Rename the columns to indicate that they are averages of those measures.
+	16. Write the Final file using write.table.

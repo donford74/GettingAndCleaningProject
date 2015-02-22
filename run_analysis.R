@@ -30,7 +30,8 @@
 ##     for each activity and each subject.
 ## 
 ## Data collected as of 2015/02/20
-## As a preprocessing step, I removed the commas
+## 
+library(data.table)
 
 ## Read the raw data measurements for train and test
 X_train_raw <- read.csv('train/X_train.txt', header=FALSE, sep="", stringsAsFactors=FALSE)
@@ -49,7 +50,7 @@ features_raw <- read.csv('features.txt', header=FALSE, sep="", col.names=c("Var_
 activities_raw <- read.csv('activity_labels.txt', header=FALSE, sep=" ", col.names=c("Act_Idx", "Activity"), stringsAsFactors=FALSE)
 
 ## Select only the mean() and std() measurement indexes and names from the raw features
-mean_std_rows <- as.vector(grep("mean()|std()", features_raw[,"Measurement"]))
+mean_std_rows <- as.vector(grep("Mean|mean|std", features_raw[,"Measurement"]))
 features_mean_std <- features_raw[mean_std_rows,]
 mean_std_cols <- features_mean_std[ , "Var_Idx"]
 
@@ -57,22 +58,22 @@ mean_std_cols <- features_mean_std[ , "Var_Idx"]
 X_train_mean_std <- X_train_raw[,mean_std_cols]
 X_test_mean_std <- X_test_raw[,mean_std_cols]
 
-## Add the mean() and std() measurement names to the train and test data frames of mean() and std() measurements
+## Add the mean() and std() measurement names to the train and test data frames of mean and std measurements
 ## using the vector of names from the earlier step
 names(X_train_mean_std) <- features_mean_std[ , "Measurement"]
 names(X_test_mean_std) <- features_mean_std[ , "Measurement"]
 
-## Add the subject indexes to the train and test data frames of mean() and std() measurements
-X_train_mean_std$SubjectIdx <- subject_train_raw[1, ]
-X_test_mean_std$SubjectIdx <- subject_test_raw[1, ]
+## Add the subject indexes to the train and test data frames of mean and std measurements
+X_train_mean_std$SubjectIdx <- subject_train_raw[, 1]
+X_test_mean_std$SubjectIdx <- subject_test_raw[, 1]
 
-## Add the activity indexes to the train and test subject indexed mean() and std() data frames
-X_train_mean_std$ActivityIdx <- Y_train_raw[1, ]
-X_test_mean_std$ActivityIdx <- Y_test_raw[1, ]
+## Add the activity indexes to the train and test subject indexed mean and std data frames
+X_train_mean_std$ActivityIdx <- Y_train_raw[, 1]
+X_test_mean_std$ActivityIdx <- Y_test_raw[, 1]
 
 ## Add the activity names to the train/test subject and activity indexed mean() and std() data frames
-X_train_mean_std$ActivityName <- apply(X_train_mean_std[, "ActivityIdx"], 1, function(x) { activities_raw[ activities_raw$Act_Idx==x, "Activity"] })
-X_test_mean_std$ActivityName <- apply(X_test_mean_std[, "ActivityIdx"], 1, function(x) { activities_raw[ activities_raw$Act_Idx==x, "Activity"] })
+X_train_mean_std$ActivityName <- sapply(X_train_mean_std[, "ActivityIdx"], function(x) { activities_raw[ activities_raw$Act_Idx==x, "Activity"] })
+X_test_mean_std$ActivityName <- sapply(X_test_mean_std[, "ActivityIdx"], function(x) { activities_raw[ activities_raw$Act_Idx==x, "Activity"] })
 
 ## Set the row names so they will be unique 
 rownames(X_train_mean_std) <- lapply(rownames(X_train_mean_std), function(x) { paste("train", x, sep = "") } )
@@ -81,8 +82,23 @@ rownames(X_test_mean_std) <- lapply(rownames(X_test_mean_std), function(x) { pas
 ## Merge the test and train data frames
 Final_mean_std_data <- rbind(X_train_mean_std, X_test_mean_std)
 
-## Write the intermediary file
-write.csv(Final_mean_std_data, "Final_mean_std_data.csv")
+## Write the intermediary file for debugging - commented out for final
+## write.csv(Final_mean_std_data, "Final_mean_std_data.csv")
 
+## Create a new data frame containing the averages of each measurement grouped by subject and activity.
+## Next create a list of labels for each average
+measure_mean_names <- lapply(features_mean_std[ , "Measurement"], function(x) { paste("average of ", x, sep = "") } )
 
+## Create the data frame with averages grouped by subject and activity
+##   Also suppress the warnings from aggregate attempting to get the mean of the activity name column
+suppressWarnings(tidy_activity_averages <- aggregate(Final_mean_std_data, 
+                                    list(Subject = Final_mean_std_data$SubjectIdx, Activity = Final_mean_std_data$ActivityName),
+                                    function(x) { mean(x) }))
+## Remove the "SubjectIdx", "ActivityIdx", and "ActivityName" columns - they were invalidated by the aggregate
+tidy_activity_averages_final <- tidy_activity_averages[ , c(-89, -90, -91)]
 
+## Rename the columns to indicate that they are averages of those measures
+names(tidy_activity_averages_final) <- c("Subject", "Activity", measure_mean_names)
+
+## Write the Final file
+write.table(tidy_activity_averages_final, "Don_tidy_activity_averages.txt", row.name=FALSE)
