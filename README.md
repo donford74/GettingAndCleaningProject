@@ -1,9 +1,13 @@
+# Getting and Cleaning Data course project
 This repository contains my Johns Hopkins Data Science Getting and Cleaning Data course project.
 The contents are:
     The Code Book explaining the data: CodeBook.md
     The processing script: run_analysis.R
     This readme file: README.md
-    
+
+## Data Description
+[Original data source](http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones)
+[Class data source](https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip)
 The run_analysis.R reads in the raw data files:
   Data:
 
@@ -28,7 +32,11 @@ It also reads in the descriptive files:
   
     Features: (describes the measurements)
         features.txt
-
+          
+## Data Preprocessing Steps      
+No preprocessing is required.
+    
+## Script Description
 The overall purpose of the script is to read in the observations for mean() and std() measurements 
 for both the training and test datasets. Combine them and appropriatly associate the measurements
 with activities and subjects. Labeling both the measurements and observations with meaningful names.
