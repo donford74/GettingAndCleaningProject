@@ -3,7 +3,9 @@
 ## Input Data Feature Selection 
 ### Data Description
 [Original data source](http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones)
+
 [Class data source](https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip)
+
 The run_analysis.R reads in the raw data files:
   Data:
 
